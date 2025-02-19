@@ -1,14 +1,20 @@
 package com.example.javalabs.controllers;
 
 import com.example.javalabs.models.Freelancer;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
 public class Controller {
-
     private List<Freelancer> freelancersList;
 
     private void createTestFreelancers() {
@@ -26,14 +32,14 @@ public class Controller {
     @GetMapping("/freelancers") // http://localhost:8080/api/freelancers?category=cat
     public List<Freelancer> getFreelancers(@RequestParam String category) {
         Queue<Freelancer> queue = new LinkedList<>();
-                for(int i=0; i<freelancersList.size(); i++) {
-                    if (freelancersList.get(i).getCategory().equals(category)) {
-                        queue.add(freelancersList.get(i));
-                    }
-                }
-                if (queue.isEmpty()) {
-                    return Collections.emptyList();
-                }
+        for (int i = 0; i < freelancersList.size(); i++) {
+            if (freelancersList.get(i).getCategory().equals(category)) {
+                queue.add(freelancersList.get(i));
+            }
+        }
+        if (queue.isEmpty()) {
+            return Collections.emptyList();
+        }
         return queue.stream().toList();
     }
 
