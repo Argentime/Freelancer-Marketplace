@@ -6,11 +6,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api")
@@ -38,13 +40,16 @@ public class Controller {
             }
         }
         if (queue.isEmpty()) {
-            return Collections.emptyList();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Freenacers matching the parameters");
         }
         return queue.stream().toList();
     }
 
     @GetMapping("/freelancers/{id}") // http://localhost:8080/api/freelancers/numb
     public Freelancer getFreelancerById(@PathVariable int id) {
-        return freelancersList.get(id);
+        if ((id >= 0) && (id <= freelancersList.size())) {
+            return freelancersList.get(id);
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Freelancer not found");
     }
 }
