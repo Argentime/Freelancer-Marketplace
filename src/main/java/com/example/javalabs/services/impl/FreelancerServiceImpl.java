@@ -1,10 +1,12 @@
-package com.example.javalabs.services;
+package com.example.javalabs.services.impl;
 
 import com.example.javalabs.models.Freelancer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import com.example.javalabs.services.FreelancerService;
 import org.springframework.stereotype.Service;
 
 @Service
