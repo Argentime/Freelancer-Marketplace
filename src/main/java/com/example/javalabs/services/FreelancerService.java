@@ -2,6 +2,7 @@ package com.example.javalabs.services;
 
 import com.example.javalabs.models.Freelancer;
 import java.util.List;
+import java.util.Set;
 
 public interface FreelancerService {
     // Основные CRUD операции для фрилансеров
