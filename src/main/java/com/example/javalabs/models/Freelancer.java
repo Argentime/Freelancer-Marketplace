@@ -1,16 +1,6 @@
 package com.example.javalabs.models;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.util.List;
 import java.util.Set;
 
@@ -19,8 +9,8 @@ import java.util.Set;
 public class Freelancer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
+
     private String name;
     private String category;
     private double rating;
@@ -37,14 +27,17 @@ public class Freelancer {
     )
     private Set<Skill> skills;
 
+    // Конструкторы
     public Freelancer() {}
-    public Freelancer(String name, String category, double rating, int completedOrders) {
+
+    public Freelancer(String name, String category, double rating, int hourlyRate) {
         this.name = name;
         this.category = category;
         this.rating = rating;
         this.hourlyRate = hourlyRate;
     }
 
+    // Геттеры и сеттеры
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
