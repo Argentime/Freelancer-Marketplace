@@ -100,5 +100,5 @@ public class FreelancerServiceImpl implements FreelancerService {
     @Override
     public List<Freelancer> getAllFreelancers() {
         return freelancerRepository.findAll(); // Возвращаем пустой список, если данных нет
-    } //вц
+    }
 }
