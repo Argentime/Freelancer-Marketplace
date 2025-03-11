@@ -2,11 +2,19 @@ package com.example.javalabs.controllers;
 
 import com.example.javalabs.models.Freelancer;
 import com.example.javalabs.services.FreelancerService;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api")
@@ -17,7 +25,6 @@ public class FreelancersController {
         this.freelancerService = freelancerService;
     }
 
-    // Получить всех фрилансеров
     @GetMapping("/freelancers")
     public List<Freelancer> getFreelancers(@RequestParam(required = false) String category) {
         if (category != null) {
@@ -26,7 +33,6 @@ public class FreelancersController {
         return freelancerService.getAllFreelancers();
     }
 
-    // Получить фрилансера по ID
     @GetMapping("/freelancers/{id}")
     public Freelancer getFreelancerById(@PathVariable Long id) {
         try {
@@ -36,27 +42,23 @@ public class FreelancersController {
         }
     }
 
-    // Создать нового фрилансера
     @PostMapping("/freelancers")
     @ResponseStatus(HttpStatus.CREATED)
     public Freelancer createFreelancer(@RequestBody Freelancer freelancer) {
         return freelancerService.createFreelancer(freelancer);
     }
 
-    // Обновить фрилансера
     @PutMapping("/freelancers/{id}")
     public Freelancer updateFreelancer(@PathVariable Long id, @RequestBody Freelancer freelancerDetails) {
         return freelancerService.updateFreelancer(id, freelancerDetails);
     }
 
-    // Удалить фрилансера
     @DeleteMapping("/freelancers/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFreelancer(@PathVariable Long id) {
         freelancerService.deleteFreelancer(id);
     }
 
-    // Добавить заказ фрилансеру
     @PostMapping("/freelancers/{id}/orders")
     public Freelancer addOrderToFreelancer(@PathVariable Long id,
                                            @RequestParam String description,
@@ -64,7 +66,6 @@ public class FreelancersController {
         return freelancerService.addOrderToFreelancer(id, description, price);
     }
 
-    // Добавить навык фрилансеру
     @PostMapping("/freelancers/{id}/skills")
     public Freelancer addSkillToFreelancer(@PathVariable Long id, @RequestParam String skillName) {
         return freelancerService.addSkillToFreelancer(id, skillName);

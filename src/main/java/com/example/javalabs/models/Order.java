@@ -25,7 +25,6 @@ public class Order {
     @JsonIgnore
     private Freelancer freelancer;
 
-    // Конструкторы, геттеры и сеттеры
     public Order() {}
 
     public Order(String description, double price) {
@@ -33,12 +32,35 @@ public class Order {
         this.price = price;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
-    public Freelancer getFreelancer() { return freelancer; }
-    public void setFreelancer(Freelancer freelancer) { this.freelancer = freelancer; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public Freelancer getFreelancer() {
+        return freelancer;
+    }
+
+    public void setFreelancer(Freelancer freelancer) {
+        this.freelancer = freelancer;
+    }
 }

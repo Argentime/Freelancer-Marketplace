@@ -7,22 +7,19 @@ import com.example.javalabs.repositories.FreelancerRepository;
 import com.example.javalabs.repositories.OrderRepository;
 import com.example.javalabs.repositories.SkillRepository;
 import com.example.javalabs.services.FreelancerService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
 public class FreelancerServiceImpl implements FreelancerService {
-
     private final FreelancerRepository freelancerRepository;
     private final OrderRepository orderRepository;
     private final SkillRepository skillRepository;
 
-    // Внедрение зависимостей через конструктор
     public FreelancerServiceImpl(FreelancerRepository freelancerRepository,
                                  OrderRepository orderRepository,
                                  SkillRepository skillRepository) {
@@ -33,7 +30,6 @@ public class FreelancerServiceImpl implements FreelancerService {
 
     @Override
     public Freelancer createFreelancer(Freelancer freelancer) {
-        // Инициализация коллекций, если они null
         if (freelancer.getOrders() == null) {
             freelancer.setOrders(new java.util.ArrayList<>());
         }
@@ -61,7 +57,6 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancer.setCategory(freelancerDetails.getCategory());
         freelancer.setRating(freelancerDetails.getRating());
         freelancer.setHourlyRate(freelancerDetails.getHourlyRate());
-        // Обновление коллекций возможно через отдельные методы (addOrderToFreelancer, addSkillToFreelancer)
         return freelancerRepository.save(freelancer);
     }
 
@@ -75,30 +70,28 @@ public class FreelancerServiceImpl implements FreelancerService {
     public Freelancer addOrderToFreelancer(Long freelancerId, String orderDescription, double orderPrice) {
         Freelancer freelancer = getFreelancerById(freelancerId);
         Order order = new Order(orderDescription, orderPrice);
-        order.setFreelancer(freelancer); // Установка связи @ManyToOne
-        freelancer.getOrders().add(order); // Добавление в коллекцию @OneToMany
-        orderRepository.save(order); // Сохранение заказа
-        return freelancerRepository.save(freelancer); // Сохранение фрилансера с обновленной коллекцией
+        order.setFreelancer(freelancer);
+        freelancer.getOrders().add(order);
+        orderRepository.save(order);
+        return freelancerRepository.save(freelancer);
     }
 
     @Override
     public Freelancer addSkillToFreelancer(Long freelancerId, String skillName) {
         Freelancer freelancer = getFreelancerById(freelancerId);
 
-        // Проверяем, существует ли навык, или создаем новый
         Optional<Skill> existingSkill = skillRepository.findByName(skillName);
         Skill skill = existingSkill.orElseGet(() -> {
             Skill newSkill = new Skill(skillName);
             return skillRepository.save(newSkill);
         });
 
-        // Добавляем навык в коллекцию фрилансера
         freelancer.getSkills().add(skill);
         return freelancerRepository.save(freelancer);
     }
 
     @Override
     public List<Freelancer> getAllFreelancers() {
-        return freelancerRepository.findAll(); // Возвращаем пустой список, если данных нет
+        return freelancerRepository.findAll();
     }
 }
