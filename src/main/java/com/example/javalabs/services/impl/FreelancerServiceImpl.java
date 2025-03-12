@@ -8,17 +8,17 @@ import com.example.javalabs.repositories.FreelancerRepository;
 import com.example.javalabs.repositories.OrderRepository;
 import com.example.javalabs.repositories.SkillRepository;
 import com.example.javalabs.services.FreelancerService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
 public class FreelancerServiceImpl implements FreelancerService {
-
     private final FreelancerRepository freelancerRepository;
     private final OrderRepository orderRepository;
     private final SkillRepository skillRepository;
@@ -97,7 +97,8 @@ public class FreelancerServiceImpl implements FreelancerService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order with ID " + orderId + " not found"));
         if (!order.getFreelancer().getId().equals(freelancerId)) {
-            throw new IllegalArgumentException("Order with ID " + orderId + " does not belong to Freelancer with ID " + freelancerId);
+            throw new IllegalArgumentException("Order with ID " + orderId +
+                                               " does not belong to Freelancer with ID " + freelancerId);
         }
         freelancer.getOrders().remove(order);
         orderRepository.delete(order);
@@ -111,7 +112,8 @@ public class FreelancerServiceImpl implements FreelancerService {
         Skill skill = skillRepository.findById(skillId)
                 .orElseThrow(() -> new IllegalArgumentException("Skill with ID " + skillId + " not found"));
         if (!freelancer.getSkills().remove(skill)) {
-            throw new IllegalArgumentException("Skill with ID " + skillId + " is not associated with Freelancer with ID " + freelancerId);
+            throw new IllegalArgumentException("Skill with ID " + skillId +
+                                               " is not associated with Freelancer with ID " + freelancerId);
         }
         freelancerRepository.save(freelancer);
         freelancerCache.clear();
@@ -120,9 +122,14 @@ public class FreelancerServiceImpl implements FreelancerService {
     @Override
     public List<Freelancer> getFreelancers(String category, String skillName) {
         if (freelancerCache.containsKey(category, skillName)) {
-            return freelancerCache.getFreelancers(category, skillName);
+            return freelancerCache.getFreelancers(category, skillName).stream()
+                    .sorted(Comparator.comparingLong(Freelancer::getId))
+                    .collect(Collectors.toList());
         }
-        List<Freelancer> freelancers = freelancerRepository.findByCategoryAndSkill(category, skillName);
+        List<Freelancer> freelancers = freelancerRepository.findByCategoryAndSkill(category, skillName)
+                .stream()
+                .sorted(Comparator.comparingLong(Freelancer::getId)) // Сортировка по id
+                .collect(Collectors.toList());
         freelancerCache.putFreelancers(category, skillName, freelancers);
         return freelancers;
     }

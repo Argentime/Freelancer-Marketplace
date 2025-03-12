@@ -1,11 +1,9 @@
 package com.example.javalabs.services;
 
 import com.example.javalabs.models.Freelancer;
-
 import java.util.List;
 
 public interface FreelancerService {
-
     Freelancer createFreelancer(Freelancer freelancer);
 
     Freelancer getFreelancerById(Long id);

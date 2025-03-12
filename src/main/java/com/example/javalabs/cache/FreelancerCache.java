@@ -1,11 +1,10 @@
 package com.example.javalabs.cache;
 
 import com.example.javalabs.models.Freelancer;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
 @Component
 public class FreelancerCache {
