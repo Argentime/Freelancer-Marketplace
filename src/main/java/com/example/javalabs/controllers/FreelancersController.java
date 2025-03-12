@@ -2,19 +2,11 @@ package com.example.javalabs.controllers;
 
 import com.example.javalabs.models.Freelancer;
 import com.example.javalabs.services.FreelancerService;
-import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -25,12 +17,15 @@ public class FreelancersController {
         this.freelancerService = freelancerService;
     }
 
+    // Существующие методы остаются без изменений
     @GetMapping("/freelancers")
-    public List<Freelancer> getFreelancers(@RequestParam(required = false) String category) {
-        if (category != null) {
-            return freelancerService.getFreelancersByCategory(category);
-        }
+    public List<Freelancer> getAllFreelancers() {
         return freelancerService.getAllFreelancers();
+    }
+
+    @GetMapping("/freelancers/category")
+    public List<Freelancer> getFreelancersByCategory(@RequestParam String category) {
+        return freelancerService.getFreelancersByCategory(category);
     }
 
     @GetMapping("/freelancers/{id}")
@@ -69,5 +64,23 @@ public class FreelancersController {
     @PostMapping("/freelancers/{id}/skills")
     public Freelancer addSkillToFreelancer(@PathVariable Long id, @RequestParam String skillName) {
         return freelancerService.addSkillToFreelancer(id, skillName);
+    }
+
+    @DeleteMapping("/freelancers/{freelancerId}/orders/{orderId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteOrderFromFreelancer(@PathVariable Long freelancerId, @PathVariable Long orderId) {
+        freelancerService.deleteOrderFromFreelancer(freelancerId, orderId);
+    }
+
+    @DeleteMapping("/freelancers/{freelancerId}/skills/{skillId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteSkillFromFreelancer(@PathVariable Long freelancerId, @PathVariable Long skillId) {
+        freelancerService.deleteSkillFromFreelancer(freelancerId, skillId);
+    }
+
+    // Новый метод
+    @GetMapping("/freelancers/by-skill")
+    public List<Freelancer> getFreelancersBySkill(@RequestParam String skillName) {
+        return freelancerService.getFreelancersBySkill(skillName);
     }
 }
