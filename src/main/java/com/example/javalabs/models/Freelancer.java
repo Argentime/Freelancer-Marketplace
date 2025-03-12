@@ -37,7 +37,6 @@ public class Freelancer {
     )
     private Set<Skill> skills;
 
-    // Конструкторы
     public Freelancer() {}
 
     public Freelancer(String name, String category, double rating, int hourlyRate) {

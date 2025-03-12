@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,12 +123,12 @@ public class FreelancerServiceImpl implements FreelancerService {
         if (freelancerCache.containsKey(category, skillName)) {
             return freelancerCache.getFreelancers(category, skillName).stream()
                     .sorted(Comparator.comparingLong(Freelancer::getId))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         List<Freelancer> freelancers = freelancerRepository.findByCategoryAndSkill(category, skillName)
                 .stream()
                 .sorted(Comparator.comparingLong(Freelancer::getId)) // Сортировка по id
-                .collect(Collectors.toList());
+                .toList();
         freelancerCache.putFreelancers(category, skillName, freelancers);
         return freelancers;
     }
