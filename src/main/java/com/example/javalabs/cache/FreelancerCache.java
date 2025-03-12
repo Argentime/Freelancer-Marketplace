@@ -9,25 +9,29 @@ import java.util.Map;
 
 @Component
 public class FreelancerCache {
-    private final Map<String, List<Freelancer>> cacheBySkill;
+    private final Map<String, List<Freelancer>> cache;
 
     public FreelancerCache() {
-        this.cacheBySkill = new HashMap<>();
+        this.cache = new HashMap<>();
     }
 
-    public List<Freelancer> getFreelancersBySkill(String skillName) {
-        return cacheBySkill.get(skillName);
+    private String generateKey(String category, String skillName) {
+        return (category != null ? category : "null") + "_" + (skillName != null ? skillName : "null");
     }
 
-    public void putFreelancersBySkill(String skillName, List<Freelancer> freelancers) {
-        cacheBySkill.put(skillName, freelancers);
+    public List<Freelancer> getFreelancers(String category, String skillName) {
+        return cache.get(generateKey(category, skillName));
+    }
+
+    public void putFreelancers(String category, String skillName, List<Freelancer> freelancers) {
+        cache.put(generateKey(category, skillName), freelancers);
     }
 
     public void clear() {
-        cacheBySkill.clear();
+        cache.clear();
     }
 
-    public boolean containsKey(String skillName) {
-        return cacheBySkill.containsKey(skillName);
+    public boolean containsKey(String category, String skillName) {
+        return cache.containsKey(generateKey(category, skillName));
     }
 }

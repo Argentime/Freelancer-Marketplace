@@ -17,15 +17,12 @@ public class FreelancersController {
         this.freelancerService = freelancerService;
     }
 
-    // Существующие методы остаются без изменений
+    // Объединенный метод с фильтрацией
     @GetMapping("/freelancers")
-    public List<Freelancer> getAllFreelancers() {
-        return freelancerService.getAllFreelancers();
-    }
-
-    @GetMapping("/freelancers/category")
-    public List<Freelancer> getFreelancersByCategory(@RequestParam String category) {
-        return freelancerService.getFreelancersByCategory(category);
+    public List<Freelancer> getFreelancers(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String skillName) {
+        return freelancerService.getFreelancers(category, skillName);
     }
 
     @GetMapping("/freelancers/{id}")
@@ -76,11 +73,5 @@ public class FreelancersController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSkillFromFreelancer(@PathVariable Long freelancerId, @PathVariable Long skillId) {
         freelancerService.deleteSkillFromFreelancer(freelancerId, skillId);
-    }
-
-    // Новый метод
-    @GetMapping("/freelancers/by-skill")
-    public List<Freelancer> getFreelancersBySkill(@RequestParam String skillName) {
-        return freelancerService.getFreelancersBySkill(skillName);
     }
 }

@@ -22,24 +22,25 @@ public class FreelancerServiceImpl implements FreelancerService {
     private final FreelancerRepository freelancerRepository;
     private final OrderRepository orderRepository;
     private final SkillRepository skillRepository;
-    private final FreelancerCache freelancerCache; // Добавляем кэш
+    private final FreelancerCache freelancerCache;
 
     public FreelancerServiceImpl(FreelancerRepository freelancerRepository,
                                  OrderRepository orderRepository,
                                  SkillRepository skillRepository,
-                                 FreelancerCache freelancerCache) { // Внедряем кэш через конструктор
+                                 FreelancerCache freelancerCache) {
         this.freelancerRepository = freelancerRepository;
         this.orderRepository = orderRepository;
         this.skillRepository = skillRepository;
         this.freelancerCache = freelancerCache;
     }
 
-    // Существующие методы остаются без изменений
     @Override
     public Freelancer createFreelancer(Freelancer freelancer) {
         if (freelancer.getOrders() == null) freelancer.setOrders(new java.util.ArrayList<>());
         if (freelancer.getSkills() == null) freelancer.setSkills(new HashSet<>());
-        return freelancerRepository.save(freelancer);
+        Freelancer savedFreelancer = freelancerRepository.save(freelancer);
+        freelancerCache.clear();
+        return savedFreelancer;
     }
 
     @Override
@@ -49,24 +50,22 @@ public class FreelancerServiceImpl implements FreelancerService {
     }
 
     @Override
-    public List<Freelancer> getFreelancersByCategory(String category) {
-        return freelancerRepository.findByCategory(category);
-    }
-
-    @Override
     public Freelancer updateFreelancer(Long id, Freelancer freelancerDetails) {
         Freelancer freelancer = getFreelancerById(id);
         freelancer.setName(freelancerDetails.getName());
         freelancer.setCategory(freelancerDetails.getCategory());
         freelancer.setRating(freelancerDetails.getRating());
         freelancer.setHourlyRate(freelancerDetails.getHourlyRate());
-        return freelancerRepository.save(freelancer);
+        Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
+        freelancerCache.clear();
+        return updatedFreelancer;
     }
 
     @Override
     public void deleteFreelancer(Long id) {
         Freelancer freelancer = getFreelancerById(id);
         freelancerRepository.delete(freelancer);
+        freelancerCache.clear();
     }
 
     @Override
@@ -76,7 +75,9 @@ public class FreelancerServiceImpl implements FreelancerService {
         order.setFreelancer(freelancer);
         freelancer.getOrders().add(order);
         orderRepository.save(order);
-        return freelancerRepository.save(freelancer);
+        Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
+        freelancerCache.clear();
+        return updatedFreelancer;
     }
 
     @Override
@@ -85,12 +86,9 @@ public class FreelancerServiceImpl implements FreelancerService {
         Optional<Skill> existingSkill = skillRepository.findByName(skillName);
         Skill skill = existingSkill.orElseGet(() -> skillRepository.save(new Skill(skillName)));
         freelancer.getSkills().add(skill);
-        return freelancerRepository.save(freelancer);
-    }
-
-    @Override
-    public List<Freelancer> getAllFreelancers() {
-        return freelancerRepository.findAll();
+        Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
+        freelancerCache.clear();
+        return updatedFreelancer;
     }
 
     @Override
@@ -104,6 +102,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancer.getOrders().remove(order);
         orderRepository.delete(order);
         freelancerRepository.save(freelancer);
+        freelancerCache.clear();
     }
 
     @Override
@@ -115,20 +114,16 @@ public class FreelancerServiceImpl implements FreelancerService {
             throw new IllegalArgumentException("Skill with ID " + skillId + " is not associated with Freelancer with ID " + freelancerId);
         }
         freelancerRepository.save(freelancer);
+        freelancerCache.clear();
     }
 
-    // Обновленный метод с кэшем
     @Override
-    public List<Freelancer> getFreelancersBySkill(String skillName) {
-        // Проверяем кэш
-        if (freelancerCache.containsKey(skillName)) {
-            return freelancerCache.getFreelancersBySkill(skillName);
+    public List<Freelancer> getFreelancers(String category, String skillName) {
+        if (freelancerCache.containsKey(category, skillName)) {
+            return freelancerCache.getFreelancers(category, skillName);
         }
-
-        // Если в кэше нет, делаем запрос в БД
-        List<Freelancer> freelancers = freelancerRepository.findBySkillName(skillName);
-        // Сохраняем результат в кэш
-        freelancerCache.putFreelancersBySkill(skillName, freelancers);
+        List<Freelancer> freelancers = freelancerRepository.findByCategoryAndSkill(category, skillName);
+        freelancerCache.putFreelancers(category, skillName, freelancers);
         return freelancers;
     }
 }
