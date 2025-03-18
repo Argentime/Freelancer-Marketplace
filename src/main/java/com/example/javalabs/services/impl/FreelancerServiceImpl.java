@@ -8,16 +8,23 @@ import com.example.javalabs.repositories.FreelancerRepository;
 import com.example.javalabs.repositories.OrderRepository;
 import com.example.javalabs.repositories.SkillRepository;
 import com.example.javalabs.services.FreelancerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class FreelancerServiceImpl implements FreelancerService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FreelancerServiceImpl.class);
+
     private final FreelancerRepository freelancerRepository;
     private final OrderRepository orderRepository;
     private final SkillRepository skillRepository;
@@ -75,7 +82,6 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancer.getOrders().add(order);
         orderRepository.save(order);
         Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
-        freelancerCache.clear();
         return updatedFreelancer;
     }
 
@@ -96,13 +102,11 @@ public class FreelancerServiceImpl implements FreelancerService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order with ID " + orderId + " not found"));
         if (!order.getFreelancer().getId().equals(freelancerId)) {
-            throw new IllegalArgumentException("Order with ID " + orderId +
-                                               " does not belong to Freelancer with ID " + freelancerId);
+            throw new IllegalArgumentException("Order with ID " + orderId + " does not belong to Freelancer with ID " + freelancerId);
         }
         freelancer.getOrders().remove(order);
         orderRepository.delete(order);
         freelancerRepository.save(freelancer);
-        freelancerCache.clear();
     }
 
     @Override
@@ -111,8 +115,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         Skill skill = skillRepository.findById(skillId)
                 .orElseThrow(() -> new IllegalArgumentException("Skill with ID " + skillId + " not found"));
         if (!freelancer.getSkills().remove(skill)) {
-            throw new IllegalArgumentException("Skill with ID " + skillId +
-                                               " is not associated with Freelancer with ID " + freelancerId);
+            throw new IllegalArgumentException("Skill with ID " + skillId + " is not associated with Freelancer with ID " + freelancerId);
         }
         freelancerRepository.save(freelancer);
         freelancerCache.clear();
@@ -120,15 +123,27 @@ public class FreelancerServiceImpl implements FreelancerService {
 
     @Override
     public List<Freelancer> getFreelancers(String category, String skillName) {
+        long startTime;
+        List<Freelancer> freelancers;
+
         if (freelancerCache.containsKey(category, skillName)) {
-            return freelancerCache.getFreelancers(category, skillName).stream()
+            startTime = System.nanoTime();
+            freelancers = freelancerCache.getFreelancers(category, skillName).stream()
                     .sorted(Comparator.comparingLong(Freelancer::getId))
-                    .toList();
+                    .collect(Collectors.toList());
+            long endTime = System.nanoTime();
+            logger.info("Data retrieved from cache in {} ns", endTime - startTime);
+            return freelancers;
         }
-        List<Freelancer> freelancers = freelancerRepository.findByCategoryAndSkill(category, skillName)
+
+        startTime = System.nanoTime();
+        freelancers = freelancerRepository.findByCategoryAndSkill(category, skillName)
                 .stream()
-                .sorted(Comparator.comparingLong(Freelancer::getId)) // Сортировка по id
-                .toList();
+                .sorted(Comparator.comparingLong(Freelancer::getId))
+                .collect(Collectors.toList());
+        long endTime = System.nanoTime();
+        logger.info("Data retrieved from database in {} ns", endTime - startTime);
+
         freelancerCache.putFreelancers(category, skillName, freelancers);
         return freelancers;
     }

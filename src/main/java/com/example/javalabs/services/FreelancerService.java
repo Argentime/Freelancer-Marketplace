@@ -20,6 +20,5 @@ public interface FreelancerService {
 
     void deleteSkillFromFreelancer(Long freelancerId, Long skillId);
 
-    // Объединенный метод
     List<Freelancer> getFreelancers(String category, String skillName);
 }

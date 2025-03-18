@@ -25,7 +25,6 @@ public class FreelancersController {
         this.freelancerService = freelancerService;
     }
 
-    // Объединенный метод с фильтрацией
     @GetMapping("/freelancers")
     public List<Freelancer> getFreelancers(
             @RequestParam(required = false) String category,
