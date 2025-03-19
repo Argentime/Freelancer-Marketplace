@@ -37,6 +37,7 @@ public class FreelancerCache {
         String key = generateKey(category, skillName);
         List<Freelancer> result = cache.get(key);
         if (result != null) {
+            key.replaceAll("[\n\r]", "_");
             logger.info("Cache hit for key: {}", key);
         }
         return result;
