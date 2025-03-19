@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class FreelancerCache {
     private static final Logger CACHE_LOGGER = LoggerFactory.getLogger(FreelancerCache.class);
     private static final int MAX_CACHE_SIZE = 100;
+    private static final int MAX_FREELANCERS_PER_LIST = 1000;
 
     private final Map<String, List<Freelancer>> cache;
 
@@ -43,6 +44,10 @@ public class FreelancerCache {
     }
 
     public void putFreelancers(String category, String skillName, List<Freelancer> freelancers) {
+        if (freelancers.size() > MAX_FREELANCERS_PER_LIST) {
+            CACHE_LOGGER.warn("List size exceeds limit ({}), truncating to {} elements", MAX_FREELANCERS_PER_LIST, MAX_FREELANCERS_PER_LIST);
+            freelancers = freelancers.subList(0, MAX_FREELANCERS_PER_LIST);
+        }
         String key = generateKey(category, skillName);
         cache.put(key, freelancers);
         CACHE_LOGGER.info("Added to cache: key={}, size={}", key, cache.size());
