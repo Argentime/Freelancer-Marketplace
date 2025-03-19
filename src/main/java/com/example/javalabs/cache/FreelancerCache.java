@@ -1,17 +1,16 @@
 package com.example.javalabs.cache;
 
 import com.example.javalabs.models.Freelancer;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 @Component
 public class FreelancerCache {
-    private static final Logger logger = LoggerFactory.getLogger(FreelancerCache.class);
+    private static final Logger CACHE_LOGGER = LoggerFactory.getLogger(FreelancerCache.class);
     private static final int MAX_CACHE_SIZE = 100;
 
     private final Map<String, List<Freelancer>> cache;
@@ -21,7 +20,8 @@ public class FreelancerCache {
             @Override
             protected boolean removeEldestEntry(Map.Entry<String, List<Freelancer>> eldest) {
                 if (size() > MAX_CACHE_SIZE) {
-                    logger.info("Cache size limit ({}) reached, removing oldest entry: {}", MAX_CACHE_SIZE, eldest.getKey());
+                    CACHE_LOGGER.info("Cache size limit ({}) reached, removing oldest entry: {}",
+                                      MAX_CACHE_SIZE, eldest.getKey());
                     return true;
                 }
                 return false;
@@ -37,7 +37,7 @@ public class FreelancerCache {
         String key = generateKey(category, skillName);
         List<Freelancer> result = cache.get(key);
         if (result != null) {
-            logger.info("Cache hit for key: {}", key);
+            CACHE_LOGGER.info("Cache hit for key: {}", key);
         }
         return result;
     }
@@ -45,11 +45,11 @@ public class FreelancerCache {
     public void putFreelancers(String category, String skillName, List<Freelancer> freelancers) {
         String key = generateKey(category, skillName);
         cache.put(key, freelancers);
-        logger.info("Added to cache: key={}, size={}", key, cache.size());
+        CACHE_LOGGER.info("Added to cache: key={}, size={}", key, cache.size());
     }
 
     public void clear() {
-        logger.info("Clearing cache, previous size: {}", cache.size());
+        CACHE_LOGGER.info("Clearing cache, previous size: {}", cache.size());
         cache.clear();
     }
 
