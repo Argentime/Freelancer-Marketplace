@@ -62,9 +62,8 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancer.setCategory(freelancerDetails.getCategory());
         freelancer.setRating(freelancerDetails.getRating());
         freelancer.setHourlyRate(freelancerDetails.getHourlyRate());
-        Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
         freelancerCache.clear();
-        return updatedFreelancer;
+        return freelancerRepository.save(freelancer);
     }
 
     @Override
@@ -81,8 +80,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         order.setFreelancer(freelancer);
         freelancer.getOrders().add(order);
         orderRepository.save(order);
-        Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
-        return updatedFreelancer;
+        return freelancerRepository.save(freelancer);
     }
 
     @Override
@@ -91,9 +89,8 @@ public class FreelancerServiceImpl implements FreelancerService {
         Optional<Skill> existingSkill = skillRepository.findByName(skillName);
         Skill skill = existingSkill.orElseGet(() -> skillRepository.save(new Skill(skillName)));
         freelancer.getSkills().add(skill);
-        Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
         freelancerCache.clear();
-        return updatedFreelancer;
+        return freelancerRepository.save(freelancer);
     }
 
     @Override
@@ -130,7 +127,7 @@ public class FreelancerServiceImpl implements FreelancerService {
             startTime = System.nanoTime();
             freelancers = freelancerCache.getFreelancers(category, skillName).stream()
                     .sorted(Comparator.comparingLong(Freelancer::getId))
-                    .collect(Collectors.toList());
+                    .toList();
             long endTime = System.nanoTime();
             logger.info("Data retrieved from cache in {} ns", endTime - startTime);
             return freelancers;
@@ -140,7 +137,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancers = freelancerRepository.findByCategoryAndSkill(category, skillName)
                 .stream()
                 .sorted(Comparator.comparingLong(Freelancer::getId))
-                .collect(Collectors.toList());
+                .toList();
         long endTime = System.nanoTime();
         logger.info("Data retrieved from database in {} ns", endTime - startTime);
 
