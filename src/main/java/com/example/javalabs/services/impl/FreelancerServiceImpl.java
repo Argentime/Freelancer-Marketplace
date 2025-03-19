@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -110,7 +109,7 @@ public class FreelancerServiceImpl implements FreelancerService {
     public void deleteSkillFromFreelancer(Long freelancerId, Long skillId) {
         Freelancer freelancer = getFreelancerById(freelancerId);
         Skill skill = skillRepository.findById(skillId)
-                .orElseThrow(() -> new IllegalArgumentException("Skill with ID " + skillId + " not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Skill with ID " + skillId + " not exist"));
         if (!freelancer.getSkills().remove(skill)) {
             throw new IllegalArgumentException("Skill with ID " + skillId + " is not associated with Freelancer with ID " + freelancerId);
         }
