@@ -11,6 +11,12 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
 import java.util.List;
 import java.util.Set;
 
@@ -21,10 +27,19 @@ public class Freelancer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name cannot be blank")
+    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
     private String name;
+
+    @NotBlank(message = "Category cannot be blank")
     private String category;
-    private double rating;
-    private int hourlyRate;
+
+    @Min(value = 0, message = "Rating must be at least 0")
+    @Max(value = 5, message = "Rating must not exceed 5")
+    private Double rating;
+
+    @Positive(message = "Hourly rate must be positive")
+    private Double hourlyRate;
 
     @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
@@ -39,7 +54,7 @@ public class Freelancer {
 
     public Freelancer() {}
 
-    public Freelancer(String name, String category, double rating, int hourlyRate) {
+    public Freelancer(String name, String category, double rating, double hourlyRate) {
         this.name = name;
         this.category = category;
         this.rating = rating;
@@ -78,11 +93,11 @@ public class Freelancer {
         this.rating = rating;
     }
 
-    public int getHourlyRate() {
+    public double getHourlyRate() {
         return hourlyRate;
     }
 
-    public void setHourlyRate(int hourlyRate) {
+    public void setHourlyRate(double hourlyRate) {
         this.hourlyRate = hourlyRate;
     }
 
