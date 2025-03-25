@@ -127,16 +127,18 @@ public class FreelancersController {
     }
 
     @GetMapping("/logs")
-    @Operation(summary = "Get logs", description = "Retrieve logs, optionally filtered by date (format: yyyy-MM-dd)")
+    @Operation(summary = "Get logs", description = "Retrieve logs, optionally filtered by date (yyyy-MM-dd) and/or level (INFO, WARN, ERROR)")
     @ApiResponse(responseCode = "200", description = "Logs retrieved")
     @ApiResponse(responseCode = "400", description = "Invalid date or file error")
-    public ResponseEntity<String> getLogsByDate(
-            @RequestParam(required = false) String date) throws IOException {
+    public ResponseEntity<String> getLogs(
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String level) throws IOException {
         try {
-            String logs = logService.getLogsByDate(date);
+            String logs = logService.getLogs(date, level);
             return ResponseEntity.ok(logs);
         } catch (IOException e) {
-            throw new ValidationException("Failed to read logs" + (date != null ? " for date: " + date : ""));
+            throw new ValidationException("Failed to read logs" + (date != null ? " for date: " + date : "") +
+                    (level != null ? " with level: " + level : ""));
         }
     }
 }
