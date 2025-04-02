@@ -45,7 +45,8 @@ public class FreelancerCache {
 
     public void putFreelancers(String category, String skillName, List<Freelancer> freelancers) {
         if (freelancers.size() > MAX_FREELANCERS_PER_LIST) {
-            CACHE_LOGGER.warn("List size exceeds limit ({}), truncating to {} elements", MAX_FREELANCERS_PER_LIST, MAX_FREELANCERS_PER_LIST);
+            CACHE_LOGGER.warn("List size exceeds limit ({}), truncating to {} elements",
+                              MAX_FREELANCERS_PER_LIST, MAX_FREELANCERS_PER_LIST);
             freelancers = freelancers.subList(0, MAX_FREELANCERS_PER_LIST);
         }
         String key = generateKey(category, skillName);

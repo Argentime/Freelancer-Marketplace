@@ -3,10 +3,6 @@ package com.example.javalabs.controllers;
 import com.example.javalabs.exceptions.ValidationException;
 import com.example.javalabs.models.Freelancer;
 import com.example.javalabs.services.FreelancerService;
-
-import java.io.IOException;
-import java.util.List;
-
 import com.example.javalabs.services.LogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import java.io.IOException;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -70,7 +68,8 @@ public class FreelancersController {
     @ApiResponse(responseCode = "200", description = "Freelancer updated")
     @ApiResponse(responseCode = "400", description = "Invalid input")
     @ApiResponse(responseCode = "404", description = "Freelancer not found")
-    public Freelancer updateFreelancer(@PathVariable Long id, @Valid @RequestBody Freelancer freelancerDetails) {
+    public Freelancer updateFreelancer(@PathVariable Long id,
+                                       @Valid @RequestBody Freelancer freelancerDetails) {
         return freelancerService.updateFreelancer(id, freelancerDetails);
     }
 
@@ -127,7 +126,8 @@ public class FreelancersController {
     }
 
     @GetMapping("/logs")
-    @Operation(summary = "Get logs", description = "Retrieve logs, optionally filtered by date (yyyy-MM-dd) and/or level (INFO, WARN, ERROR)")
+    @Operation(summary = "Get logs",
+               description = "Retrieve logs, optionally filtered by date (yyyy-MM-dd) and/or level")
     @ApiResponse(responseCode = "200", description = "Logs retrieved")
     @ApiResponse(responseCode = "400", description = "Invalid date or file error")
     public ResponseEntity<String> getLogs(

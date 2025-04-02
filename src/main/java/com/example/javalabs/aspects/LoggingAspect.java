@@ -11,19 +11,21 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class LoggingAspect {
-    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingAspect.class);
 
-    @AfterReturning(pointcut = "execution(* com.example.javalabs.controllers.FreelancersController.*(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* com.example.javalabs.controllers.FreelancersController.*(..))",
+                    returning = "result")
     public void logSuccessfulExecution(JoinPoint joinPoint, Object result) {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
-        logger.info("Method {} executed successfully with args: {}, result: {}", methodName, args, result);
+        LOGGER.info("Method {} executed successfully with args: {}, result: {}", methodName, args, result);
     }
 
-    @AfterThrowing(pointcut = "execution(* com.example.javalabs.controllers.FreelancersController.*(..))", throwing = "ex")
+    @AfterThrowing(pointcut = "execution(* com.example.javalabs.controllers.FreelancersController.*(..))",
+                   throwing = "ex")
     public void logException(JoinPoint joinPoint, Throwable ex) {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
-        logger.error("Method {} failed with args: {}, exception: {}", methodName, args, ex.getMessage(), ex);
+        LOGGER.error("Method {} failed with args: {}, exception: {}", methodName, args, ex.getMessage(), ex);
     }
 }

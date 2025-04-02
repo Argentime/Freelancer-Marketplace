@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class FreelancerServiceImpl implements FreelancerService {
-
-    private static final Logger logger = LoggerFactory.getLogger(FreelancerServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreelancerServiceImpl.class);
 
     private final FreelancerRepository freelancerRepository;
     private final OrderRepository orderRepository;
@@ -48,7 +46,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         if (freelancer.getSkills() == null) freelancer.setSkills(new HashSet<>());
         Freelancer savedFreelancer = freelancerRepository.save(freelancer);
         freelancerCache.clear();
-        logger.info("Freelancer created with ID: {}", savedFreelancer.getId());
+        LOGGER.info("Freelancer created with ID: {}", savedFreelancer.getId());
         return savedFreelancer;
     }
 
@@ -67,7 +65,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancer.setHourlyRate(freelancerDetails.getHourlyRate());
         Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
         freelancerCache.clear();
-        logger.info("Freelancer updated with ID: {}", id);
+        LOGGER.info("Freelancer updated with ID: {}", id);
         return updatedFreelancer;
     }
 
@@ -76,7 +74,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         Freelancer freelancer = getFreelancerById(id);
         freelancerRepository.delete(freelancer);
         freelancerCache.clear();
-        logger.info("Freelancer deleted with ID: {}", id);
+        LOGGER.info("Freelancer deleted with ID: {}", id);
     }
 
     @Override
@@ -87,7 +85,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancer.getOrders().add(order);
         orderRepository.save(order);
         Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
-        logger.info("Order added to freelancer with ID: {}", freelancerId);
+        LOGGER.info("Order added to freelancer with ID: {}", freelancerId);
         return updatedFreelancer;
     }
 
@@ -97,11 +95,12 @@ public class FreelancerServiceImpl implements FreelancerService {
         Optional<Skill> existingSkill = skillRepository.findByName(skillName);
         Skill skill = existingSkill.orElseGet(() -> skillRepository.save(new Skill(skillName)));
         if (!freelancer.getSkills().add(skill)) {
-            throw new ValidationException("Skill '" + skillName + "' is already associated with freelancer with ID " + freelancerId);
+            throw new ValidationException("Skill '" + skillName +
+                                          "' is already associated with freelancer with ID " + freelancerId);
         }
         Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
         freelancerCache.clear();
-        logger.info("Skill '{}' added to freelancer with ID: {}", skillName, freelancerId);
+        LOGGER.info("Skill '{}' added to freelancer with ID: {}", skillName, freelancerId);
         return updatedFreelancer;
     }
 
@@ -111,12 +110,13 @@ public class FreelancerServiceImpl implements FreelancerService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order with ID " + orderId + " not found"));
         if (!order.getFreelancer().getId().equals(freelancerId)) {
-            throw new ValidationException("Order with ID " + orderId + " does not belong to freelancer with ID " + freelancerId);
+            throw new ValidationException("Order with ID " + orderId +
+                                          " does not belong to freelancer with ID " + freelancerId);
         }
         freelancer.getOrders().remove(order);
         orderRepository.delete(order);
         freelancerRepository.save(freelancer);
-        logger.info("Order with ID {} deleted from freelancer with ID: {}", orderId, freelancerId);
+        LOGGER.info("Order with ID {} deleted from freelancer with ID: {}", orderId, freelancerId);
     }
 
     @Override
@@ -125,11 +125,12 @@ public class FreelancerServiceImpl implements FreelancerService {
         Skill skill = skillRepository.findById(skillId)
                 .orElseThrow(() -> new NotFoundException("Skill with ID " + skillId + " not found"));
         if (!freelancer.getSkills().remove(skill)) {
-            throw new ValidationException("Skill with ID " + skillId + " is not associated with freelancer with ID " + freelancerId);
+            throw new ValidationException("Skill with ID " + skillId +
+                                          " is not associated with freelancer with ID " + freelancerId);
         }
         freelancerRepository.save(freelancer);
         freelancerCache.clear();
-        logger.info("Skill with ID {} deleted from freelancer with ID: {}", skillId, freelancerId);
+        LOGGER.info("Skill with ID {} deleted from freelancer with ID: {}", skillId, freelancerId);
     }
 
     @Override
@@ -143,7 +144,8 @@ public class FreelancerServiceImpl implements FreelancerService {
                     .sorted(Comparator.comparingLong(Freelancer::getId))
                     .collect(Collectors.toList());
             long endTime = System.nanoTime();
-            logger.info("Data retrieved from cache in {} ns for category: {}, skillName: {}", endTime - startTime, category, skillName);
+            LOGGER.info("Data retrieved from cache in {} ns for category: {}, skillName: {}",
+                        endTime - startTime, category, skillName);
             return freelancers;
         }
 
@@ -153,7 +155,8 @@ public class FreelancerServiceImpl implements FreelancerService {
                 .sorted(Comparator.comparingLong(Freelancer::getId))
                 .collect(Collectors.toList());
         long endTime = System.nanoTime();
-        logger.info("Data retrieved from database in {} ns for category: {}, skillName: {}", endTime - startTime, category, skillName);
+        LOGGER.info("Data retrieved from database in {} ns for category: {}, skillName: {}",
+                    endTime - startTime, category, skillName);
 
         freelancerCache.putFreelancers(category, skillName, freelancers);
         return freelancers;
