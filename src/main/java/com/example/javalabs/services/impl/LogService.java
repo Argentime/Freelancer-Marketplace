@@ -1,4 +1,4 @@
-package com.example.javalabs.services;
+package com.example.javalabs.services.impl;
 
 import com.example.javalabs.exceptions.ValidationException;
 import org.slf4j.Logger;

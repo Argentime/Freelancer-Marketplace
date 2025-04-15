@@ -1,4 +1,4 @@
-package com.example.javalabs.services.impl;
+package com.example.javalabs.services;
 
 import com.example.javalabs.cache.FreelancerCache;
 import com.example.javalabs.exceptions.NotFoundException;
@@ -9,16 +9,17 @@ import com.example.javalabs.models.Skill;
 import com.example.javalabs.repositories.FreelancerRepository;
 import com.example.javalabs.repositories.OrderRepository;
 import com.example.javalabs.repositories.SkillRepository;
-import com.example.javalabs.services.FreelancerService;
+import com.example.javalabs.services.impl.FreelancerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -170,13 +171,11 @@ public class FreelancerServiceImpl implements FreelancerService {
         }
 
         List<Freelancer> result = freelancers.stream()
-                .filter(f -> f != null && f.getName() != null) // Фильтруем некорректные записи
+                .filter(f -> f != null && f.getName() != null)
                 .map(freelancer -> {
                     if (freelancer.getId() != null && freelancerRepository.existsById(freelancer.getId())) {
-                        // Обновление существующего фрилансера
                         return updateFreelancer(freelancer.getId(), freelancer);
                     } else {
-                        // Создание нового фрилансера
                         return createFreelancer(freelancer);
                     }
                 })

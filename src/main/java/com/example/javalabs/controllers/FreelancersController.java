@@ -2,8 +2,8 @@ package com.example.javalabs.controllers;
 
 import com.example.javalabs.exceptions.ValidationException;
 import com.example.javalabs.models.Freelancer;
-import com.example.javalabs.services.FreelancerService;
-import com.example.javalabs.services.LogService;
+import com.example.javalabs.services.impl.FreelancerService;
+import com.example.javalabs.services.impl.LogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
