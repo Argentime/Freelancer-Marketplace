@@ -73,7 +73,7 @@ public class FreelancerServiceImpl implements FreelancerService {
     @Override
     public void deleteFreelancer(Long id) {
         Freelancer freelancer = getFreelancerById(id);
-        freelancerRepository.delete(freelancer);
+        freelancerRepository.deleteById(id);
         freelancerCache.clear();
         LOGGER.info("Freelancer deleted with ID: {}", id);
     }
@@ -86,6 +86,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancer.getOrders().add(order);
         orderRepository.save(order);
         Freelancer updatedFreelancer = freelancerRepository.save(freelancer);
+        freelancerCache.clear();
         LOGGER.info("Order added to freelancer with ID: {}", freelancerId);
         return updatedFreelancer;
     }
@@ -110,14 +111,14 @@ public class FreelancerServiceImpl implements FreelancerService {
         Freelancer freelancer = getFreelancerById(freelancerId);
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order with ID " + orderId + " not found"));
-        if (!order.getFreelancer().getId().equals(freelancerId)) {
-            throw new ValidationException("Order with ID " + orderId +
-                                          " does not belong to freelancer with ID " + freelancerId);
+        if (order.getFreelancer() == null || !freelancer.getOrders().contains(order)) {
+            throw new ValidationException("Order with ID " + orderId + " does not belong to freelancer with ID " + freelancerId);
         }
         freelancer.getOrders().remove(order);
         orderRepository.delete(order);
         freelancerRepository.save(freelancer);
-        LOGGER.info("Order with ID {} deleted from freelancer with ID: {}", orderId, freelancerId);
+        freelancerCache.clear();
+        LOGGER.info("Deleted order {} from freelancer {}", orderId, freelancerId);
     }
 
     @Override
@@ -181,7 +182,6 @@ public class FreelancerServiceImpl implements FreelancerService {
                 })
                 .collect(Collectors.toList());
 
-        freelancerCache.clear();
         LOGGER.info("Processed bulk upsert for {} freelancers", result.size());
         return result;
     }

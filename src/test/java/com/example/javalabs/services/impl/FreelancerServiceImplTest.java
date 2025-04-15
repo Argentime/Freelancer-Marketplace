@@ -71,44 +71,34 @@ class FreelancerServiceImplTest {
     }
 
     @Test
-    void getFreelancers_noFilters_cacheMiss_returnsAll() {
-        List<Freelancer> freelancers = List.of(freelancer);
-        when(freelancerCache.getFreelancers(null, null)).thenReturn(null);
-        when(freelancerRepository.findAll()).thenReturn(freelancers);
+    void createFreelancer_valid_savesFreelancer() {
+        when(freelancerRepository.save(any(Freelancer.class))).thenReturn(freelancer);
 
-        List<Freelancer> result = freelancerService.getFreelancers(null, null);
+        Freelancer result = freelancerService.createFreelancer(freelancer);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Alice", result.get(0).getName());
-        verify(freelancerCache).putFreelancers(null, null, freelancers);
+        assertEquals("Alice", result.getName());
+        assertNotNull(result.getOrders());
+        assertNotNull(result.getSkills());
+        verify(freelancerRepository).save(freelancer);
+        verify(freelancerCache).clear();
     }
 
     @Test
-    void getFreelancers_noFilters_cacheHit_returnsCached() {
-        List<Freelancer> freelancers = List.of(freelancer);
-        when(freelancerCache.getFreelancers(null, null)).thenReturn(freelancers);
+    void createFreelancer_nullCollections_initializesCollections() {
+        Freelancer input = new Freelancer();
+        input.setName("Bob");
+        input.setCategory("dev");
+        when(freelancerRepository.save(any(Freelancer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        List<Freelancer> result = freelancerService.getFreelancers(null, null);
+        Freelancer result = freelancerService.createFreelancer(input);
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Alice", result.get(0).getName());
-        verify(freelancerRepository, never()).findAll();
-    }
-
-    @Test
-    void getFreelancers_withCategory_cacheMiss_returnsFiltered() {
-        List<Freelancer> freelancers = List.of(freelancer);
-        when(freelancerCache.getFreelancers("design", null)).thenReturn(null);
-        when(freelancerRepository.findByCategoryAndSkill("design",null)).thenReturn(freelancers);
-
-        List<Freelancer> result = freelancerService.getFreelancers("design", null);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("design", result.get(0).getCategory());
-        verify(freelancerCache).putFreelancers("design", null, freelancers);
+        assertNotNull(result.getOrders());
+        assertTrue(result.getOrders().isEmpty());
+        assertNotNull(result.getSkills());
+        assertTrue(result.getSkills().isEmpty());
+        verify(freelancerRepository).save(input);
+        verify(freelancerCache).clear();
     }
 
     @Test
@@ -119,24 +109,18 @@ class FreelancerServiceImplTest {
 
         assertNotNull(result);
         assertEquals("Alice", result.getName());
+        verify(freelancerRepository).findById(1L);
     }
 
     @Test
-    void getFreelancerById_notFound_throwsException() {
+    void getFreelancerById_notFound_throwsNotFoundException() {
         when(freelancerRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> freelancerService.getFreelancerById(1L));
-    }
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> freelancerService.getFreelancerById(1L));
 
-    @Test
-    void createFreelancer_valid_savesFreelancer() {
-        when(freelancerRepository.save(any(Freelancer.class))).thenReturn(freelancer);
-
-        Freelancer result = freelancerService.createFreelancer(freelancer);
-
-        assertNotNull(result);
-        assertEquals("Alice", result.getName());
-        verify(freelancerCache).clear();
+        assertEquals("Freelancer with ID 1 not found", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
     }
 
     @Test
@@ -155,44 +139,79 @@ class FreelancerServiceImplTest {
         assertNotNull(result);
         assertEquals("Bob", result.getName());
         assertEquals("dev", result.getCategory());
+        assertEquals(4.8, result.getRating());
+        assertEquals(30.0, result.getHourlyRate());
+        verify(freelancerRepository).findById(1L);
+        verify(freelancerRepository).save(freelancer);
         verify(freelancerCache).clear();
     }
 
     @Test
-    void updateFreelancer_notFound_throwsException() {
+    void updateFreelancer_notFound_throwsNotFoundException() {
+        Freelancer updatedDetails = new Freelancer();
         when(freelancerRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> freelancerService.updateFreelancer(1L, freelancer));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> freelancerService.updateFreelancer(1L, updatedDetails));
+
+        assertEquals("Freelancer with ID 1 not found", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(freelancerRepository, never()).save(any());
     }
 
     @Test
     void deleteFreelancer_exists_deletesFreelancer() {
-        when(freelancerRepository.existsById(1L)).thenReturn(true);
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
 
         freelancerService.deleteFreelancer(1L);
 
+        verify(freelancerRepository).findById(1L);
         verify(freelancerRepository).deleteById(1L);
         verify(freelancerCache).clear();
     }
 
     @Test
-    void deleteFreelancer_notFound_throwsException() {
-        when(freelancerRepository.existsById(1L)).thenReturn(false);
+    void deleteFreelancer_notFound_throwsNotFoundException() {
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> freelancerService.deleteFreelancer(1L));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> freelancerService.deleteFreelancer(1L));
+
+        assertEquals("Freelancer with ID 1 not found", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(freelancerRepository, never()).deleteById(any());
     }
 
     @Test
     void addOrderToFreelancer_valid_addsOrder() {
         when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
-        when(freelancerRepository.save(any(Freelancer.class))).thenReturn(freelancer);
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(freelancerRepository.save(any(Freelancer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Freelancer result = freelancerService.addOrderToFreelancer(1L, "Website design", 100.0);
 
         assertNotNull(result.getOrders());
         assertEquals(1, result.getOrders().size());
         assertEquals("Website design", result.getOrders().get(0).getDescription());
+        assertEquals(100.0, result.getOrders().get(0).getPrice());
+        assertEquals(freelancer, result.getOrders().get(0).getFreelancer());
+        verify(freelancerRepository).findById(1L);
+        verify(orderRepository).save(any(Order.class));
+        verify(freelancerRepository).save(freelancer);
         verify(freelancerCache).clear();
+    }
+
+    @Test
+    void addOrderToFreelancer_notFound_throwsNotFoundException() {
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> freelancerService.addOrderToFreelancer(1L, "Website design", 100.0));
+
+        assertEquals("Freelancer with ID 1 not found", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(orderRepository, never()).save(any());
+        verify(freelancerRepository, never()).save(any());
     }
 
     @Test
@@ -200,14 +219,64 @@ class FreelancerServiceImplTest {
         when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
         when(skillRepository.findByName("Java")).thenReturn(Optional.empty());
         when(skillRepository.save(any(Skill.class))).thenReturn(skill);
-        when(freelancerRepository.save(any(Freelancer.class))).thenReturn(freelancer);
+        when(freelancerRepository.save(any(Freelancer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Freelancer result = freelancerService.addSkillToFreelancer(1L, "Java");
 
         assertNotNull(result.getSkills());
         assertEquals(1, result.getSkills().size());
         assertTrue(result.getSkills().contains(skill));
+        verify(freelancerRepository).findById(1L);
+        verify(skillRepository).findByName("Java");
+        verify(skillRepository).save(any(Skill.class));
+        verify(freelancerRepository).save(freelancer);
         verify(freelancerCache).clear();
+    }
+
+    @Test
+    void addSkillToFreelancer_existingSkill_addsSkill() {
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
+        when(skillRepository.findByName("Java")).thenReturn(Optional.of(skill));
+        when(freelancerRepository.save(any(Freelancer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Freelancer result = freelancerService.addSkillToFreelancer(1L, "Java");
+
+        assertNotNull(result.getSkills());
+        assertEquals(1, result.getSkills().size());
+        assertTrue(result.getSkills().contains(skill));
+        verify(freelancerRepository).findById(1L);
+        verify(skillRepository).findByName("Java");
+        verify(skillRepository, never()).save(any());
+        verify(freelancerRepository).save(freelancer);
+        verify(freelancerCache).clear();
+    }
+
+    @Test
+    void addSkillToFreelancer_alreadyAssociated_throwsValidationException() {
+        freelancer.getSkills().add(skill);
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
+        when(skillRepository.findByName("Java")).thenReturn(Optional.of(skill));
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> freelancerService.addSkillToFreelancer(1L, "Java"));
+
+        assertEquals("Skill 'Java' is already associated with freelancer with ID 1", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(skillRepository).findByName("Java");
+        verify(skillRepository, never()).save(any());
+        verify(freelancerRepository, never()).save(any());
+    }
+
+    @Test
+    void addSkillToFreelancer_notFound_throwsNotFoundException() {
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> freelancerService.addSkillToFreelancer(1L, "Java"));
+
+        assertEquals("Freelancer with ID 1 not found", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(skillRepository, never()).findByName(any());
     }
 
     @Test
@@ -215,21 +284,67 @@ class FreelancerServiceImplTest {
         freelancer.getOrders().add(order);
         when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(freelancerRepository.save(any(Freelancer.class))).thenReturn(freelancer);
+        when(freelancerRepository.save(any(Freelancer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         freelancerService.deleteOrderFromFreelancer(1L, 1L);
 
         assertTrue(freelancer.getOrders().isEmpty());
+        verify(freelancerRepository).findById(1L);
+        verify(orderRepository).findById(1L);
         verify(orderRepository).delete(order);
+        verify(freelancerRepository).save(freelancer);
         verify(freelancerCache).clear();
     }
 
     @Test
-    void deleteOrderFromFreelancer_invalidOrder_throwsException() {
+    void deleteOrderFromFreelancer_orderNotFound_throwsNotFoundException() {
         when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ValidationException.class, () -> freelancerService.deleteOrderFromFreelancer(1L, 1L));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> freelancerService.deleteOrderFromFreelancer(1L, 1L));
+
+        assertEquals("Order with ID 1 not found", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(orderRepository).findById(1L);
+        verify(orderRepository, never()).delete(any());
+        verify(freelancerRepository, never()).save(any());
+    }
+
+    @Test
+    void deleteOrderFromFreelancer_invalidOrder_throwsValidationException() {
+        Order anotherOrder = new Order();
+        anotherOrder.setId(2L);
+        anotherOrder.setFreelancer(new Freelancer());
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
+        when(orderRepository.findById(2L)).thenReturn(Optional.of(anotherOrder));
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> freelancerService.deleteOrderFromFreelancer(1L, 2L));
+
+        assertEquals("Order with ID 2 does not belong to freelancer with ID 1", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(orderRepository).findById(2L);
+        verify(orderRepository, never()).delete(any());
+        verify(freelancerRepository, never()).save(any());
+    }
+
+    @Test
+    void deleteOrderFromFreelancer_nullFreelancer_throwsValidationException() {
+        Order anotherOrder = new Order();
+        anotherOrder.setId(2L);
+        anotherOrder.setFreelancer(null);
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
+        when(orderRepository.findById(2L)).thenReturn(Optional.of(anotherOrder));
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> freelancerService.deleteOrderFromFreelancer(1L, 2L));
+
+        assertEquals("Order with ID 2 does not belong to freelancer with ID 1", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(orderRepository).findById(2L);
+        verify(orderRepository, never()).delete(any());
+        verify(freelancerRepository, never()).save(any());
     }
 
     @Test
@@ -237,20 +352,94 @@ class FreelancerServiceImplTest {
         freelancer.getSkills().add(skill);
         when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
         when(skillRepository.findById(1L)).thenReturn(Optional.of(skill));
-        when(freelancerRepository.save(any(Freelancer.class))).thenReturn(freelancer);
+        when(freelancerRepository.save(any(Freelancer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         freelancerService.deleteSkillFromFreelancer(1L, 1L);
 
         assertTrue(freelancer.getSkills().isEmpty());
+        verify(freelancerRepository).findById(1L);
+        verify(skillRepository).findById(1L);
+        verify(freelancerRepository).save(freelancer);
         verify(freelancerCache).clear();
     }
 
     @Test
-    void deleteSkillFromFreelancer_invalidSkill_throwsException() {
+    void deleteSkillFromFreelancer_skillNotFound_throwsNotFoundException() {
+        when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
+        when(skillRepository.findById(1L)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> freelancerService.deleteSkillFromFreelancer(1L, 1L));
+
+        assertEquals("Skill with ID 1 not found", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(skillRepository).findById(1L);
+        verify(freelancerRepository, never()).save(any());
+    }
+
+    @Test
+    void deleteSkillFromFreelancer_notAssociated_throwsValidationException() {
         when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
         when(skillRepository.findById(1L)).thenReturn(Optional.of(skill));
 
-        assertThrows(ValidationException.class, () -> freelancerService.deleteSkillFromFreelancer(1L, 1L));
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> freelancerService.deleteSkillFromFreelancer(1L, 1L));
+
+        assertEquals("Skill with ID 1 is not associated with freelancer with ID 1", exception.getMessage());
+        verify(freelancerRepository).findById(1L);
+        verify(skillRepository).findById(1L);
+        verify(freelancerRepository, never()).save(any());
+    }
+
+    @Test
+    void getFreelancers_cacheHit_returnsCachedSorted() {
+        List<Freelancer> freelancers = new ArrayList<>();
+        freelancers.add(freelancer);
+        when(freelancerCache.containsKey(null, null)).thenReturn(true);
+        when(freelancerCache.getFreelancers(null, null)).thenReturn(freelancers);
+
+        List<Freelancer> result = freelancerService.getFreelancers(null, null);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Alice", result.get(0).getName());
+        verify(freelancerCache).containsKey(null, null);
+        verify(freelancerCache).getFreelancers(null, null);
+        verify(freelancerRepository, never()).findByCategoryAndSkill(any(), any());
+    }
+
+    @Test
+    void getFreelancers_cacheMiss_returnsFromDbAndCaches() {
+        List<Freelancer> freelancers = new ArrayList<>();
+        freelancers.add(freelancer);
+        when(freelancerCache.containsKey(null, null)).thenReturn(false);
+        when(freelancerRepository.findByCategoryAndSkill(null, null)).thenReturn(freelancers);
+
+        List<Freelancer> result = freelancerService.getFreelancers(null, null);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Alice", result.get(0).getName());
+        verify(freelancerCache).containsKey(null, null);
+        verify(freelancerRepository).findByCategoryAndSkill(null, null);
+        verify(freelancerCache).putFreelancers(null, null, freelancers);
+    }
+
+    @Test
+    void getFreelancers_withCategoryAndSkill_returnsSorted() {
+        List<Freelancer> freelancers = new ArrayList<>();
+        freelancers.add(freelancer);
+        when(freelancerCache.containsKey("design", "Java")).thenReturn(false);
+        when(freelancerRepository.findByCategoryAndSkill("design", "Java")).thenReturn(freelancers);
+
+        List<Freelancer> result = freelancerService.getFreelancers("design", "Java");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Alice", result.get(0).getName());
+        verify(freelancerCache).containsKey("design", "Java");
+        verify(freelancerRepository).findByCategoryAndSkill("design", "Java");
+        verify(freelancerCache).putFreelancers("design", "Java", freelancers);
     }
 
     @Test
@@ -260,8 +449,6 @@ class FreelancerServiceImplTest {
         newFreelancer.setCategory("dev");
         newFreelancer.setRating(4.0);
         newFreelancer.setHourlyRate(20.0);
-        newFreelancer.setOrders(new ArrayList<>());
-        newFreelancer.setSkills(new HashSet<>());
 
         Freelancer existingFreelancer = new Freelancer();
         existingFreelancer.setId(1L);
@@ -269,10 +456,10 @@ class FreelancerServiceImplTest {
         existingFreelancer.setCategory("design");
         existingFreelancer.setRating(4.8);
         existingFreelancer.setHourlyRate(30.0);
-        existingFreelancer.setOrders(new ArrayList<>());
-        existingFreelancer.setSkills(new HashSet<>());
 
-        List<Freelancer> input = List.of(newFreelancer, existingFreelancer);
+        List<Freelancer> input = new ArrayList<>();
+        input.add(newFreelancer);
+        input.add(existingFreelancer);
 
         when(freelancerRepository.existsById(1L)).thenReturn(true);
         when(freelancerRepository.findById(1L)).thenReturn(Optional.of(freelancer));
@@ -284,15 +471,17 @@ class FreelancerServiceImplTest {
         assertEquals(2, result.size());
         assertEquals("Bob", result.get(0).getName());
         assertEquals("Alice Updated", result.get(1).getName());
-        verify(freelancerCache).clear();
+        verify(freelancerRepository, times(2)).save(any(Freelancer.class));
+        verify(freelancerCache, times(2)).clear();
     }
 
     @Test
     void bulkUpsertFreelancers_emptyList_returnsEmpty() {
-        List<Freelancer> result = freelancerService.bulkUpsertFreelancers(List.of());
+        List<Freelancer> result = freelancerService.bulkUpsertFreelancers(new ArrayList<>());
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+        verify(freelancerRepository, never()).save(any());
         verify(freelancerCache, never()).clear();
     }
 
@@ -302,6 +491,7 @@ class FreelancerServiceImplTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+        verify(freelancerRepository, never()).save(any());
         verify(freelancerCache, never()).clear();
     }
 
@@ -310,25 +500,23 @@ class FreelancerServiceImplTest {
         Freelancer validFreelancer = new Freelancer();
         validFreelancer.setName("Bob");
         validFreelancer.setCategory("dev");
-        validFreelancer.setRating(4.0);
-        validFreelancer.setHourlyRate(20.0);
-        validFreelancer.setOrders(new ArrayList<>());
-        validFreelancer.setSkills(new HashSet<>());
 
         Freelancer invalidFreelancer = new Freelancer();
         invalidFreelancer.setCategory("dev");
-        invalidFreelancer.setOrders(new ArrayList<>());
-        invalidFreelancer.setSkills(new HashSet<>());
 
-        List<Freelancer> input = List.of(validFreelancer, invalidFreelancer, null);
+        List<Freelancer> input = new ArrayList<>();
+        input.add(validFreelancer);
+        input.add(invalidFreelancer);
+        input.add(null);
 
-        when(freelancerRepository.save(any(Freelancer.class))).thenReturn(validFreelancer);
+        when(freelancerRepository.save(any(Freelancer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<Freelancer> result = freelancerService.bulkUpsertFreelancers(input);
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Bob", result.get(0).getName());
+        verify(freelancerRepository).save(validFreelancer);
         verify(freelancerCache).clear();
     }
 }
