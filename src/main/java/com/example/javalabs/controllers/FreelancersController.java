@@ -11,8 +11,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -125,19 +132,26 @@ public class FreelancersController {
         freelancerService.deleteSkillFromFreelancer(freelancerId, skillId);
     }
 
-    @GetMapping("/logs")
-    @Operation(summary = "Get logs",
-               description = "Retrieve logs, optionally filtered by date (yyyy-MM-dd) and/or level")
-    @ApiResponse(responseCode = "200", description = "Logs retrieved")
+    @GetMapping(value = "/logs", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Operation(summary = "Get logs as file", description = "Download logs as a .log file, optionally filtered by date (yyyy-MM-dd) and/or level (INFO, WARN, ERROR). If date is not specified, returns logs for today.")
+    @ApiResponse(responseCode = "200", description = "Logs file downloaded")
     @ApiResponse(responseCode = "400", description = "Invalid date or file error")
-    public ResponseEntity<String> getLogs(
+    public ResponseEntity<Resource> getLogs(
             @RequestParam(required = false) String date,
             @RequestParam(required = false) String level) throws IOException {
         try {
-            String logs = logService.getLogs(date, level);
-            return ResponseEntity.ok(logs);
+            Path logFilePath = logService.getLogs(date, level);
+            Resource resource = new PathResource(logFilePath);
+
+            String fileName = "logs-" + (date != null ? date : LocalDate.now().toString()) +
+                    (level != null ? "-" + level : "") + ".log";
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .body(resource);
         } catch (IOException e) {
-            throw new ValidationException("Failed to read logs" + (date != null ? " for date: " + date : "") +
+            throw new ValidationException("Failed to retrieve logs" + (date != null ? " for date: " + date : "") +
                     (level != null ? " with level: " + level : ""));
         }
     }
