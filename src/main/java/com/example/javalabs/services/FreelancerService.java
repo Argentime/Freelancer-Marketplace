@@ -21,4 +21,6 @@ public interface FreelancerService {
     void deleteSkillFromFreelancer(Long freelancerId, Long skillId);
 
     List<Freelancer> getFreelancers(String category, String skillName);
+
+    List<Freelancer> bulkUpsertFreelancers(List<Freelancer> freelancers);
 }

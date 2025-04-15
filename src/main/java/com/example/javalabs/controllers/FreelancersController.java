@@ -53,6 +53,15 @@ public class FreelancersController {
         return freelancerService.getFreelancers(category, skillName);
     }
 
+    @PostMapping("/freelancers/bulk")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Bulk upsert freelancers", description = "Create or update multiple freelancers")
+    @ApiResponse(responseCode = "200", description = "Freelancers processed")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
+    public List<Freelancer> bulkUpsertFreelancers(@Valid @RequestBody List<Freelancer> freelancers) {
+        return freelancerService.bulkUpsertFreelancers(freelancers);
+    }
+
     @GetMapping("/freelancers/{id}")
     @Operation(summary = "Get freelancer by ID", description = "Retrieve a freelancer by their ID")
     @ApiResponse(responseCode = "200", description = "Freelancer found")

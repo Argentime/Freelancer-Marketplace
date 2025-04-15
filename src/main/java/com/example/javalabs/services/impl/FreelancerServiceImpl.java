@@ -161,4 +161,29 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancerCache.putFreelancers(category, skillName, freelancers);
         return freelancers;
     }
+    @Override
+    @Transactional
+    public List<Freelancer> bulkUpsertFreelancers(List<Freelancer> freelancers) {
+        if (freelancers == null || freelancers.isEmpty()) {
+            LOGGER.warn("Bulk upsert called with empty or null list");
+            return List.of();
+        }
+
+        List<Freelancer> result = freelancers.stream()
+                .filter(f -> f != null && f.getName() != null) // Фильтруем некорректные записи
+                .map(freelancer -> {
+                    if (freelancer.getId() != null && freelancerRepository.existsById(freelancer.getId())) {
+                        // Обновление существующего фрилансера
+                        return updateFreelancer(freelancer.getId(), freelancer);
+                    } else {
+                        // Создание нового фрилансера
+                        return createFreelancer(freelancer);
+                    }
+                })
+                .collect(Collectors.toList());
+
+        freelancerCache.clear();
+        LOGGER.info("Processed bulk upsert for {} freelancers", result.size());
+        return result;
+    }
 }
