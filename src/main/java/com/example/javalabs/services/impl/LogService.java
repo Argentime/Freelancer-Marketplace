@@ -1,10 +1,6 @@
 package com.example.javalabs.services.impl;
 
 import com.example.javalabs.exceptions.ValidationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,10 +10,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class LogService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(LogService.class);
     private final String logDir;
     private static final String LOG_FILE_PATTERN = "app-%s.log";
@@ -32,7 +30,9 @@ public class LogService {
 
     public Path getLogs(String date, String level) throws IOException {
         try {
-            LocalDate targetDate = (date == null) ? LocalDate.now() : LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+            LocalDate targetDate = (date == null) ?
+                    LocalDate.now() :
+                    LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
             String logFilePath = String.format(logDir + "/" + LOG_FILE_PATTERN, targetDate.toString());
             Path path = Paths.get(logFilePath);
 
@@ -46,7 +46,8 @@ public class LogService {
                     .filter(line -> level == null || extractLogLevel(line).equalsIgnoreCase(level))
                     .collect(Collectors.toList());
 
-            LOGGER.info("Retrieved logs from file: {} with level: {}", logFilePath, level != null ? level : "all");
+            LOGGER.info("Retrieved logs from file: {} with level: {}",
+                        logFilePath, level != null ? level : "all");
 
             if (logs.isEmpty()) {
                 throw new IOException("No logs found for date: " + targetDate);

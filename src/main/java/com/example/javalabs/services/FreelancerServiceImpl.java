@@ -10,16 +10,15 @@ import com.example.javalabs.repositories.FreelancerRepository;
 import com.example.javalabs.repositories.OrderRepository;
 import com.example.javalabs.repositories.SkillRepository;
 import com.example.javalabs.services.impl.FreelancerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -112,7 +111,8 @@ public class FreelancerServiceImpl implements FreelancerService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order with ID " + orderId + " not found"));
         if (order.getFreelancer() == null || !freelancer.getOrders().contains(order)) {
-            throw new ValidationException("Order with ID " + orderId + " does not belong to freelancer with ID " + freelancerId);
+            throw new ValidationException("Order with ID " + orderId +
+                                          " does not belong to freelancer with ID " + freelancerId);
         }
         freelancer.getOrders().remove(order);
         orderRepository.delete(order);
@@ -163,6 +163,7 @@ public class FreelancerServiceImpl implements FreelancerService {
         freelancerCache.putFreelancers(category, skillName, freelancers);
         return freelancers;
     }
+
     @Override
     @Transactional
     public List<Freelancer> bulkUpsertFreelancers(List<Freelancer> freelancers) {

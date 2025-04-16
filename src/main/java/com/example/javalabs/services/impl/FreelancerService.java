@@ -1,7 +1,6 @@
 package com.example.javalabs.services.impl;
 
 import com.example.javalabs.models.Freelancer;
-
 import java.util.List;
 
 public interface FreelancerService {

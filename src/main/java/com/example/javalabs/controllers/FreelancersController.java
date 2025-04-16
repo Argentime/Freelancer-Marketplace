@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
-
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -142,7 +141,10 @@ public class FreelancersController {
     }
 
     @GetMapping(value = "/logs", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    @Operation(summary = "Get logs as file", description = "Download logs as a .log file, optionally filtered by date (yyyy-MM-dd) and/or level (INFO, WARN, ERROR). If date is not specified, returns logs for today.")
+    @Operation(summary = "Get logs as file",
+               description = "Download logs as a .log file," +
+               " optionally filtered by date (yyyy-MM-dd) and/or level (INFO, WARN, ERROR). " +
+               "If date is not specified, returns logs for today.")
     @ApiResponse(responseCode = "200", description = "Logs file downloaded")
     @ApiResponse(responseCode = "400", description = "Invalid date or file error")
     public ResponseEntity<Resource> getLogs(
@@ -160,8 +162,10 @@ public class FreelancersController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                     .body(resource);
         } catch (IOException e) {
-            throw new ValidationException("Failed to retrieve logs" + (date != null ? " for date: " + date : "") +
-                    (level != null ? " with level: " + level : ""));
+            throw new ValidationException("Failed to retrieve logs" +
+                                          (date != null ? " for date: " + date : "") +
+                                          (level != null ? " with level: " + level : "")
+                                         );
         }
     }
 }
