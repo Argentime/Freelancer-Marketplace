@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class LogService {
                     .filter(line -> !line.trim().isEmpty())
                     .filter(line -> line.length() >= 25)
                     .filter(line -> level == null || extractLogLevel(line).equalsIgnoreCase(level))
-                    .collect(Collectors.toList());
+                    .toList();
 
             LOGGER.info("Retrieved logs from file: {} with level: {}",
                         logFilePath, level != null ? level : "all");

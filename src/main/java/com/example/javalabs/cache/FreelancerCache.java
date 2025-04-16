@@ -51,7 +51,7 @@ public class FreelancerCache {
         }
         String key = generateKey(category, skillName);
         cache.put(key, freelancers);
-        CACHE_LOGGER.info("Added to cache: key={}, size={}", key, cache.size());
+        CACHE_LOGGER.info("Added to cache: size={}", cache.size());
     }
 
     public void clear() {
