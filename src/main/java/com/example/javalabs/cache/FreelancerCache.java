@@ -38,7 +38,7 @@ public class FreelancerCache {
         String key = generateKey(category, skillName);
         List<Freelancer> result = cache.get(key);
         if (result != null) {
-            CACHE_LOGGER.info("Cache hit for key: {}", key);
+            CACHE_LOGGER.info("Cache hit for hash: {}", cache.get(key).hashCode());
         }
         return result;
     }
