@@ -29,7 +29,7 @@ public class FreelancerServiceImpl implements FreelancerService {
     private final OrderRepository orderRepository;
     private final SkillRepository skillRepository;
     private final FreelancerCache freelancerCache;
-    private final String nf = " not found";
+    private static final String NF = " not found";
 
     public FreelancerServiceImpl(FreelancerRepository freelancerRepository,
                                  OrderRepository orderRepository,
@@ -54,7 +54,7 @@ public class FreelancerServiceImpl implements FreelancerService {
     @Override
     public Freelancer getFreelancerById(Long id) {
         return freelancerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Freelancer with ID " + id + nf));
+                .orElseThrow(() -> new NotFoundException("Freelancer with ID " + id + NF));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class FreelancerServiceImpl implements FreelancerService {
     public void deleteOrderFromFreelancer(Long freelancerId, Long orderId) {
         Freelancer freelancer = getFreelancerById(freelancerId);
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("Order with ID " + orderId + nf));
+                .orElseThrow(() -> new NotFoundException("Order with ID " + orderId + NF));
         if (order.getFreelancer() == null || !freelancer.getOrders().contains(order)) {
             throw new ValidationException("Order with ID " + orderId +
                                           " does not belong to freelancer with ID " + freelancerId);
@@ -126,7 +126,7 @@ public class FreelancerServiceImpl implements FreelancerService {
     public void deleteSkillFromFreelancer(Long freelancerId, Long skillId) {
         Freelancer freelancer = getFreelancerById(freelancerId);
         Skill skill = skillRepository.findById(skillId)
-                .orElseThrow(() -> new NotFoundException("Skill with ID " + skillId + nf));
+                .orElseThrow(() -> new NotFoundException("Skill with ID " + skillId + NF));
         if (!freelancer.getSkills().remove(skill)) {
             throw new ValidationException("Skill with ID " + skillId +
                                           " is not associated with freelancer with ID " + freelancerId);
