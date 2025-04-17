@@ -175,13 +175,7 @@ public class FreelancerServiceImpl implements FreelancerService {
 
         List<Freelancer> result = freelancers.stream()
                 .filter(f -> f != null && f.getName() != null)
-                .map(freelancer -> {
-                    if (freelancer.getId() != null && freelancerRepository.existsById(freelancer.getId())) {
-                        return updateFreelancer(freelancer.getId(), freelancer);
-                    } else {
-                        return createFreelancer(freelancer);
-                    }
-                })
+                .map(this::createFreelancer)
                 .collect(Collectors.toList());
 
         LOGGER.info("Processed bulk upsert for {} freelancers", result.size());

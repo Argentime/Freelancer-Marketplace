@@ -1,5 +1,4 @@
 <configuration>
-    <!-- Определяем переменную для пути к логам -->
     <property name="LOG_PATH" value="logs" />
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n" />
 
