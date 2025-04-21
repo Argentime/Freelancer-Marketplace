@@ -1,6 +1,7 @@
 package com.example.javalabs.services.impl;
 
 import com.example.javalabs.exceptions.ValidationException;
+import com.example.javalabs.services.LogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
