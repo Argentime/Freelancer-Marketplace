@@ -46,7 +46,6 @@ public class LogService {
 
         CompletableFuture.supplyAsync(() -> {
             try {
-                // Имитация 10-секундной задержки
                 Thread.sleep(10000);
                 Path result = getLogs(date, level);
                 task.setLogFile(result);

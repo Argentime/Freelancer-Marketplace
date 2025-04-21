@@ -1,6 +1,5 @@
 package com.example.javalabs.controllers;
 
-import com.example.javalabs.exceptions.ValidationException;
 import com.example.javalabs.models.Freelancer;
 import com.example.javalabs.services.impl.FreelancerService;
 import com.example.javalabs.services.LogService;
@@ -10,16 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalDate;
 import java.util.List;
-import org.springframework.core.io.PathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
