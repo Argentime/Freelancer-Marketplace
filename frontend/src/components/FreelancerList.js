@@ -1,27 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box, Typography } from '@mui/material';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Button,
+    Box,
+    Typography,
+    Grid
+} from '@mui/material';
 import axios from 'axios';
 import FreelancerForm from './FreelancerForm';
 import FreelancerDetails from './FreelancerDetails';
+import BulkUploadForm from './BulkUploadForm';
+import FilterForm from './FilterForm';
 
 const FreelancerList = () => {
     const [freelancers, setFreelancers] = useState([]);
     const [openForm, setOpenForm] = useState(false);
     const [openDetails, setOpenDetails] = useState(false);
+    const [openBulkForm, setOpenBulkForm] = useState(false);
     const [selectedFreelancer, setSelectedFreelancer] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [filters, setFilters] = useState({ category: '', skillName: '' });
 
     useEffect(() => {
         fetchFreelancers();
-    }, []);
+    }, [filters]);
 
     const fetchFreelancers = async () => {
         setLoading(true);
+        setError(null);
         try {
-            const response = await axios.get('http://localhost:8080/api/freelancers');
+            const params = {};
+            if (filters.category) params.category = filters.category;
+            if (filters.skillName) params.skillName = filters.skillName;
+            const response = await axios.get('http://localhost:8080/api/freelancers', { params });
             setFreelancers(response.data);
         } catch (error) {
             console.error('Error fetching freelancers:', error);
+            setError('Failed to fetch freelancers.');
         } finally {
             setLoading(false);
         }
@@ -43,6 +65,7 @@ const FreelancerList = () => {
             fetchFreelancers();
         } catch (error) {
             console.error('Error deleting freelancer:', error);
+            setError('Failed to delete freelancer.');
         }
     };
 
@@ -56,11 +79,34 @@ const FreelancerList = () => {
         fetchFreelancers();
     };
 
+    const handleBulkFormClose = () => {
+        setOpenBulkForm(false);
+        fetchFreelancers();
+    };
+
+    const handleFilterApply = (newFilters) => {
+        setFilters(newFilters);
+    };
+
     return (
         <Box>
-            <Button variant="contained" color="primary" onClick={handleAdd} sx={{ mb: 2 }} disabled={loading}>
-                Add Freelancer
-            </Button>
+            <Typography variant="h4" gutterBottom>
+                Freelancers
+            </Typography>
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item>
+                    <Button variant="contained" color="primary" onClick={handleAdd} disabled={loading}>
+                        Add Freelancer
+                    </Button>
+                </Grid>
+                <Grid item>
+                    <Button variant="contained" color="secondary" onClick={() => setOpenBulkForm(true)} disabled={loading}>
+                        Bulk Upload
+                    </Button>
+                </Grid>
+            </Grid>
+            <FilterForm onApply={handleFilterApply} />
+            {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
             {loading ? (
                 <Typography>Loading...</Typography>
             ) : (
@@ -85,8 +131,8 @@ const FreelancerList = () => {
                                     <TableCell>{freelancer.rating}</TableCell>
                                     <TableCell>{freelancer.hourlyRate}</TableCell>
                                     <TableCell>
-                                        <Button onClick={() => handleViewDetails(freelancer)}>View</Button>
-                                        <Button onClick={() => handleEdit(freelancer)} color="primary">Edit</Button>
+                                        <Button onClick={() => handleViewDetails(freelancer)} sx={{ mr: 1 }}>View</Button>
+                                        <Button onClick={() => handleEdit(freelancer)} color="primary" sx={{ mr: 1 }}>Edit</Button>
                                         <Button onClick={() => handleDelete(freelancer.id)} color="error">Delete</Button>
                                     </TableCell>
                                 </TableRow>
@@ -97,6 +143,7 @@ const FreelancerList = () => {
             )}
             <FreelancerForm open={openForm} handleClose={handleFormClose} freelancer={selectedFreelancer} />
             <FreelancerDetails open={openDetails} handleClose={() => setOpenDetails(false)} freelancer={selectedFreelancer} />
+            <BulkUploadForm open={openBulkForm} handleClose={handleBulkFormClose} />
         </Box>
     );
 };
