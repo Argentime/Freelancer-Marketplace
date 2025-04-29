@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Typography } from '@mui/material';
 import axios from 'axios';
 
 const FreelancerForm = ({ open, handleClose, freelancer }) => {
@@ -9,6 +9,7 @@ const FreelancerForm = ({ open, handleClose, freelancer }) => {
         rating: '',
         hourlyRate: ''
     });
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (freelancer) {
@@ -26,15 +27,27 @@ const FreelancerForm = ({ open, handleClose, freelancer }) => {
     };
 
     const handleSubmit = async () => {
+        setError(null);
         try {
+            const data = {
+                name: formData.name,
+                category: formData.category,
+                rating: parseFloat(formData.rating),
+                hourlyRate: parseFloat(formData.hourlyRate)
+            };
             if (freelancer) {
-                await axios.put(`http://localhost:8080/api/freelancers/${freelancer.id}`, formData);
+                await axios.put(`http://localhost:8080/api/freelancers/${freelancer.id}`, data, {
+                    headers: { 'Content-Type': 'application/json' }
+                });
             } else {
-                await axios.post('http://localhost:8080/api/freelancers', formData);
+                await axios.post('http://localhost:8080/api/freelancers', data, {
+                    headers: { 'Content-Type': 'application/json' }
+                });
             }
             handleClose();
         } catch (error) {
             console.error('Error saving freelancer:', error);
+            setError('Failed to save freelancer. Please check the input.');
         }
     };
 
@@ -42,6 +55,7 @@ const FreelancerForm = ({ open, handleClose, freelancer }) => {
         <Dialog open={open} onClose={handleClose}>
             <DialogTitle>{freelancer ? 'Edit Freelancer' : 'Add Freelancer'}</DialogTitle>
             <DialogContent>
+                {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
                 <TextField
                     margin="dense"
                     name="name"
@@ -69,6 +83,7 @@ const FreelancerForm = ({ open, handleClose, freelancer }) => {
                     onChange={handleChange}
                     fullWidth
                     required
+                    inputProps={{ step: '0.1', min: '0', max: '5' }}
                 />
                 <TextField
                     margin="dense"
@@ -79,6 +94,7 @@ const FreelancerForm = ({ open, handleClose, freelancer }) => {
                     onChange={handleChange}
                     fullWidth
                     required
+                    inputProps={{ step: '0.01', min: '0' }}
                 />
             </DialogContent>
             <DialogActions>

@@ -1,15 +1,14 @@
 import React from 'react';
-import { Container, Typography, CssBaseline } from '@mui/material';
-import FreelancerList from './components/FreelancerList';
+import { CssBaseline, Container } from '@mui/material';
+import Navbar from './components/layout/Navbar';
+import FreelancerList from './components/freelancer/FreelancerList';
 
 function App() {
     return (
         <div>
             <CssBaseline />
+            <Navbar />
             <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-                <Typography variant="h4" gutterBottom>
-                    Freelancer Management
-                </Typography>
                 <FreelancerList />
             </Container>
         </div>
