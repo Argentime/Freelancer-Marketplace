@@ -28,7 +28,7 @@ const BulkUploadForm = ({ open, handleClose }) => {
             <DialogTitle>Bulk Upload Freelancers</DialogTitle>
             <DialogContent>
                 <Typography sx={{ mb: 2 }}>
-                    Enter a JSON array of freelancers, e.g.:
+                    Enter a JSON array of freelancers
                 </Typography>
                 {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
                 <TextField

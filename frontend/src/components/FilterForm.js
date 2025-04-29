@@ -6,7 +6,10 @@ const FilterForm = ({ onApply }) => {
     const [skillName, setSkillName] = useState('');
 
     const handleApply = () => {
-        onApply({ category, skillName });
+        onApply({
+            category: category.trim() || '',
+            skillName: skillName.trim() || ''
+        });
     };
 
     const handleClear = () => {
@@ -23,6 +26,7 @@ const FilterForm = ({ onApply }) => {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     fullWidth
+                    placeholder="e.g., Developer"
                 />
             </Grid>
             <Grid item xs={12} sm={5}>
@@ -31,6 +35,7 @@ const FilterForm = ({ onApply }) => {
                     value={skillName}
                     onChange={(e) => setSkillName(e.target.value)}
                     fullWidth
+                    placeholder="e.g., Java"
                 />
             </Grid>
             <Grid item xs={12} sm={2}>
