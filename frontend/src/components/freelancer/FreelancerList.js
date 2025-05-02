@@ -26,7 +26,6 @@ const FreelancerList = () => {
 
     useEffect(() => {
         fetchFreelancers();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filters]);
 
     const fetchFreelancers = async () => {
@@ -117,15 +116,6 @@ const FreelancerList = () => {
                     </Button>
                 </Grid>
                 <Grid item>
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => setOpenBulkForm(true)}
-                        disabled={loading}
-                        sx={{ borderRadius: '20px', textTransform: 'none', px: 3 }}
-                    >
-                        Bulk Upload
-                    </Button>
                 </Grid>
             </Grid>
             <FilterForm onApply={handleFilterApply} />
@@ -151,7 +141,7 @@ const FreelancerList = () => {
                                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                                         {freelancer.category}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ color: '#f5c518', mb: 1 }}>
+                                    <Typography variant="body2" sx={{ color: '#d6b004', mb: 1 }}>
                                         ★ {freelancer.rating}
                                     </Typography>
                                     <Typography variant="h6" sx={{ color: '#1dbf73', fontWeight: 'bold' }}>

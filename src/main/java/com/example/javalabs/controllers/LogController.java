@@ -2,6 +2,8 @@ package com.example.javalabs.controllers;
 
 import com.example.javalabs.models.LogTask;
 import com.example.javalabs.services.LogService;
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -13,13 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
-
 @RestController
 @RequestMapping("/api/logs")
 public class LogController {
-
     private final LogService logService;
 
     public LogController(LogService logService) {

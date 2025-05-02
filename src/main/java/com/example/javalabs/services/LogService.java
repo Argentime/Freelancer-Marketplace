@@ -2,11 +2,6 @@ package com.example.javalabs.services;
 
 import com.example.javalabs.exceptions.ValidationException;
 import com.example.javalabs.models.LogTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,10 +14,13 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 @Service
 public class LogService {
-
     private static final Logger logger = LoggerFactory.getLogger(LogService.class);
     private final String logDir;
     private static final String LOG_FILE_PATTERN = "app-%s.log";
@@ -46,7 +44,7 @@ public class LogService {
 
         CompletableFuture.supplyAsync(() -> {
             try {
-                Thread.sleep(10000);
+                Thread.sleep(20000);
                 Path result = getLogs(date, level);
                 task.setLogFile(result);
                 task.setStatus("COMPLETED");

@@ -94,9 +94,6 @@ const FreelancerDetails = ({ open, handleClose, freelancer }) => {
             <DialogContent>
                 <Box sx={{ mb: 3 }}>
                     <Typography variant="body1" sx={{ color: '#555', mb: 1 }}>
-                        ID: {freelancer.id}
-                    </Typography>
-                    <Typography variant="body1" sx={{ color: '#555', mb: 1 }}>
                         Category: {freelancer.category}
                     </Typography>
                     <Typography variant="body1" sx={{ color: '#f5c518', mb: 1 }}>

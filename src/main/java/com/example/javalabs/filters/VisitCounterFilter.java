@@ -6,13 +6,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
+import org.springframework.stereotype.Component;
 
 @Component
 public class VisitCounterFilter implements Filter {
-
     private final VisitCounterService visitCounterService;
 
     public VisitCounterFilter(VisitCounterService visitCounterService) {
