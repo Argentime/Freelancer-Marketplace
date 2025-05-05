@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Freelancers", description = "API for managing freelancers")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "https://freelance-marketplace-frontend.onrender.com"})
 public class FreelancersController {
     private final FreelancerService freelancerService;
 
