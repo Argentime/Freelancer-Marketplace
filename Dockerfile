@@ -12,3 +12,4 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:MaxMetaspaceSize=64m"
 ENTRYPOINT ["java", "-jar", "java $JAVA_OPTS -jar app.jar"]
+
