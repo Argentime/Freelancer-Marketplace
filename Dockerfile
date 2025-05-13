@@ -13,3 +13,4 @@ EXPOSE 8080
 ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:MaxMetaspaceSize=64m"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 
+
